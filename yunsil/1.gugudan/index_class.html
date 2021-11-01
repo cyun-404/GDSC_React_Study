@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- html은 위에서 아래로 실행된다. -->
+    <!-- 리액트 라이브러리 -->
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <!-- 리액트 컴포넌트를 웹 DOM화면에 붙여서 반영(렌더링) -->
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <!-- 최신/실험적 문법을 JS에서 쓸수있게 해준다. -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- babel 설정 -->
+    <script type="text/babel"> 
+        class GuGuDan extends React.Component{
+            // constructor(props){
+            //     super(props);
+            //     this.state={
+            //         first:Math.ceil(Math.random()*9),
+            //         second:Math.ceil(Math.random()*9),
+            //         value:'',
+            //         result:''
+            //     };
+            // }
+            //생성자 없애도 동일하게 동작함    
+            state={
+                first:Math.ceil(Math.random()*9),
+                second:Math.ceil(Math.random()*9),
+                value:'',
+                result:''
+            };
+       
+
+            //JSX의 태그로부터 자바스크립트 로직은 웬만하면 분리시킨다
+            //-> 클래스의 메소드로 만들기
+            onSubmit = (e)=>{
+                e.preventDefault();
+                if (parseInt(this.state.value) === this.state.first * this.state.second) {
+                    // this.setState({
+                    //     //this.state -> 현재 상태값
+                    //     result:'정답:'+this.state.value,
+                    //     //미래 상태값
+                    //     first:Math.ceil(Math.random() * 9),
+                    //     second:Math.ceil(Math.random() * 9),
+                    //     value:''
+                    // });
+                    this.setState((prevState) => {
+                            return {
+                                //this.state 대신 prevState를 사용하는걸 권장
+                                result:'정답:'+prevState.value,
+                                first:Math.ceil(Math.random() * 9),
+                                second:Math.ceil(Math.random() * 9),
+                                value:''                                
+                            }
+                        }
+                    );
+                    this.input.focus();
+                } else {
+                    this.setState({
+                        result:'땡',
+                        value:''
+                    });
+                    this.input.focus();
+                }
+            }
+
+            onChange = (e)=>{
+                //개발자가 직접 만드는 함수는 화살표 함수를 써야 this가 제대로 동작
+                //render()는 오버라이드 개념으로 화살표함수 쓸필요없음
+                this.setState({value:e.target.value})
+            }
+
+            //ref로 DOM 접근
+            input; 
+
+            onRefInput = (c)=>{this.input = c;}
+
+            render(){  
+                //setState()할 때 마다 render() 호출
+                //{} 안에 함수 정의하면 계속 새로 정의되어서 성능 느려짐 -> 위로 빼둔다.
+                //ex. input에 value값 한글자씩 입력할때마다 onChange() 때문에 render() 호출
+                console.log('렌더링');
+                //onChange 시 입력되는 값을 state로 직접 제어 
+                return (
+                    //리액트는 컴포넌트 최상단을 하나의 태그로 묶어야하는데
+                    //최상단 <div>를 없애려면 <div> 대신 <React.Fragment> 로 감싼다.
+                    <React.Fragment>
+                        <div>{this.state.first} 곱하기 {this.state.second}는?</div>
+                        <form onSubmit={this.onSubmit}>
+                            <input ref={this.onRefInput} type="number" value={this.state.value} onChange={this.onChange}/>
+                            <button type="submit">입력</button>    
+                        </form>
+                        <div>{this.state.result}</div>
+                    </React.Fragment>
+                );
+            }
+        }
+    </script>
+    <script type="text/babel">
+        //같은 컴포넌트 클래스지만 인스턴스 개념이므로 다른 state 값을 가진다.
+        ReactDOM.render(<div><GuGuDan/><GuGuDan/></div>, document.querySelector('#root'));
+    </script>
+</body>
+</html>
